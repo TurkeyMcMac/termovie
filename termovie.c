@@ -36,20 +36,28 @@ bool print_next_frame(char **line, size_t *cap, char *delim, FILE *movie)
 
 int main(int argc, char *argv[])
 {
-	FILE *movie = fopen(argv[1], "r");
-	char *delim = NULL;
-	size_t cap = 0;
-	getline(&delim, &cap, movie);
-	long frames_begin = ftell(movie);
+	FILE *movie;
+	char *delim, *line;
+	size_t cap;
+	long frames_begin;
+
 	prepare_terminator();
+
+	movie = fopen(argv[1], "r");
+	delim = NULL;
+	cap = 0;
+	getline(&delim, &cap, movie);
+	frames_begin = ftell(movie);
+
 	initscr();
-	char *line = NULL;
+
+	line = NULL;
 	cap = 0;
 	while (!terminated) {
-		while (!terminated
-			&& print_next_frame(&line, &cap, delim, movie));
+		while (print_next_frame(&line, &cap, delim, movie)
+			&& !terminated);
 		fseek(movie, frames_begin, SEEK_SET);
 	}
+
 	endwin();
-	return 0;
 }
