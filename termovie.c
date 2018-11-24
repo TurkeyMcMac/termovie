@@ -9,23 +9,6 @@
 #define ERROR_ARGUMENT 1
 #define ERROR_SYSTEM 2
 
-sig_atomic_t terminated = false;
-void handle_termination(int _)
-{
-	(void)_;
-	terminated = true;
-}
-void prepare_terminator(void)
-{
-	struct sigaction action;
-	memset(&action, 0, sizeof(action));
-	action.sa_handler = handle_termination;
-	sigaction(SIGINT, &action, NULL);
-}
-void terminate(void)
-{
-}
-
 bool print_next_frame(char **line, size_t *cap, char *delim, FILE *movie)
 {
 	int n_lines = 0;
@@ -52,8 +35,6 @@ int main(int argc, char *argv[])
 	size_t cap;
 	long frames_begin;
 
-	prepare_terminator();
-
 	prog_name = argv[0];
 	movie_name = argv[1];
 	if (!movie_name) {
@@ -74,13 +55,10 @@ int main(int argc, char *argv[])
 	}
 	frames_begin = ftell(movie);
 
-	atexit(terminate);
-
 	line = NULL;
 	cap = 0;
-	while (!terminated) {
-		while (print_next_frame(&line, &cap, delim, movie)
-			&& !terminated);
+	while (1) {
+		while (print_next_frame(&line, &cap, delim, movie));
 		fseek(movie, frames_begin, SEEK_SET);
 	}
 }
