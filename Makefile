@@ -1,2 +1,2 @@
 termovie: termovie.c
-	$(CC) -O3 -o $@ $< -lncurses
+	$(CC) -O3 -o $@ $<

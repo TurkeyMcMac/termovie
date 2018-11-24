@@ -1,10 +1,9 @@
 #include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 #include <unistd.h>
-#include <ncurses.h>
 
 #define ERROR_ARGUMENT 1
 #define ERROR_SYSTEM 2
