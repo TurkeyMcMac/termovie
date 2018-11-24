@@ -5,12 +5,21 @@
 #include <string.h>
 #include <unistd.h>
 
+static struct movie {
+	FILE *frames;
+	char *delim;
+	size_t frames_begin;
+	int speed;
+	bool looping;
+} movie;
+
 #define ERROR_ARGUMENT 1
 #define ERROR_SYSTEM 2
 
-bool print_frame_line(char **line, size_t *cap, char *delim, FILE *movie)
+bool print_frame_line(char **line, size_t *cap)
 {
-	if (getline(line, cap, movie) > 0 && strcmp(*line, delim)) {
+	if (getline(line, cap, movie.frames) > 0 && strcmp(*line, movie.delim))
+	{
 		printf("\e[K%s", *line);
 		return true;
 	} else {
@@ -18,52 +27,57 @@ bool print_frame_line(char **line, size_t *cap, char *delim, FILE *movie)
 	}
 }
 
-bool print_next_frame(char **line, size_t *cap, char *delim, FILE *movie)
+bool print_next_frame(char **line, size_t *cap)
 {
 	int n_lines = 1;
-	if (!print_frame_line(line, cap, delim, movie)) {
+	if (!print_frame_line(line, cap)) {
 		return false;
 	}
-	while (print_frame_line(line, cap, delim, movie)) {
+	while (print_frame_line(line, cap)) {
 		++n_lines;
 	}
-	usleep(100000);
+	usleep(movie.speed);
 	printf("\e[%dA\r", n_lines);
 	return true;
 }
 
-int main(int argc, char *argv[])
+void load_movie(int argc, char *argv[])
 {
-	FILE *movie;
-	char *prog_name, *movie_name;
-	char *delim, *line;
-	size_t cap;
-	long frames_begin;
-
-	prog_name = argv[0];
-	movie_name = argv[1];
+	char *prog_name = argv[0];
+	char *movie_name = argv[1];
 	if (!movie_name) {
 		fprintf(stderr, "%s: No movie name provided.\n", prog_name);
 		exit(ERROR_ARGUMENT);
 	}
-	movie = fopen(argv[1], "r");
-	if (!movie) {
+	movie.frames = fopen(argv[1], "r");
+	if (!movie.frames) {
 		fprintf(stderr, "%s: No movie named '%s' found.\n",
 			prog_name, movie_name);
 		exit(ERROR_ARGUMENT);
 	}
-	delim = NULL;
-	cap = 0;
-	if (getline(&delim, &cap, movie) < 0) {
+	movie.delim = NULL;
+	size_t cap = 0;
+	if (getline(&movie.delim, &cap, movie.frames) < 0) {
 		fprintf(stderr, "%s: %s\n", prog_name, strerror(errno));
 		exit(ERROR_SYSTEM);
 	}
-	frames_begin = ftell(movie);
+	movie.frames_begin = ftell(movie.frames);
+	movie.speed = 100000;
+	movie.looping = true;
+}
 
-	line = NULL;
-	cap = 0;
-	while (1) {
-		while (print_next_frame(&line, &cap, delim, movie));
-		fseek(movie, frames_begin, SEEK_SET);
-	}
+void play_movie(void)
+{
+	char *line = NULL;
+	size_t cap = 0;
+	do {
+		while (print_next_frame(&line, &cap));
+		fseek(movie.frames, movie.frames_begin, SEEK_SET);
+	} while (movie.looping);
+}
+
+int main(int argc, char *argv[])
+{
+	load_movie(argc, argv);
+	play_movie();
 }
