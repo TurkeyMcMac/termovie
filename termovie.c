@@ -8,17 +8,23 @@
 #define ERROR_ARGUMENT 1
 #define ERROR_SYSTEM 2
 
-bool print_next_frame(char **line, size_t *cap, char *delim, FILE *movie)
+bool print_frame_line(char **line, size_t *cap, char *delim, FILE *movie)
 {
-	int n_lines = 0;
 	if (getline(line, cap, movie) > 0 && strcmp(*line, delim)) {
 		printf("\e[K%s", *line);
-		++n_lines;
+		return true;
 	} else {
 		return false;
 	}
-	while (getline(line, cap, movie) > 0 && strcmp(*line, delim)) {
-		printf("\e[K%s", *line);
+}
+
+bool print_next_frame(char **line, size_t *cap, char *delim, FILE *movie)
+{
+	int n_lines = 1;
+	if (!print_frame_line(line, cap, delim, movie)) {
+		return false;
+	}
+	while (print_frame_line(line, cap, delim, movie)) {
 		++n_lines;
 	}
 	usleep(100000);
