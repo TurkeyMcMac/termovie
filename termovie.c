@@ -20,25 +20,32 @@ bool print_frame_line(char **line, size_t *cap)
 {
 	if (getline(line, cap, movie.frames) > 0 && strcmp(*line, movie.delim))
 	{
-		printf("\e[K%s", *line);
+		printf("%s", *line);
 		return true;
 	} else {
 		return false;
 	}
 }
 
-bool print_next_frame(char **line, size_t *cap)
+int print_next_frame(char **line, size_t *cap)
 {
 	int n_lines = 1;
 	if (!print_frame_line(line, cap)) {
-		return false;
+		return 0;
 	}
 	while (print_frame_line(line, cap)) {
 		++n_lines;
 	}
 	usleep(movie.speed);
-	printf("\e[%dA\r", n_lines);
-	return true;
+	return n_lines;
+}
+
+void clear_last_frame(int n_lines)
+{
+	printf("\e[K");
+	while (n_lines--) {
+		printf("\e[1A\e[K");
+	}
 }
 
 void load_movie(int argc, char *argv[])
@@ -101,7 +108,11 @@ void play_movie(void)
 	char *line = NULL;
 	size_t cap = 0;
 	do {
-		while (print_next_frame(&line, &cap));
+		int n_lines;
+		do {
+			n_lines = print_next_frame(&line, &cap);
+			clear_last_frame(n_lines);
+		} while (n_lines > 0);
 		fseek(movie.frames, movie.frames_begin, SEEK_SET);
 	} while (movie.looping);
 }
