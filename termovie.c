@@ -24,22 +24,23 @@ void prepare_terminator(void)
 }
 void terminate(void)
 {
-	endwin();
 }
 
 bool print_next_frame(char **line, size_t *cap, char *delim, FILE *movie)
 {
+	int n_lines = 0;
 	if (getline(line, cap, movie) > 0 && strcmp(*line, delim)) {
-		erase();
-		printw(*line);
+		printf("\e[K%s", *line);
+		++n_lines;
 	} else {
 		return false;
 	}
 	while (getline(line, cap, movie) > 0 && strcmp(*line, delim)) {
-		printw(*line);
+		printf("\e[K%s", *line);
+		++n_lines;
 	}
 	usleep(100000);
-	refresh();
+	printf("\e[%dA\r", n_lines);
 	return true;
 }
 
@@ -73,7 +74,6 @@ int main(int argc, char *argv[])
 	}
 	frames_begin = ftell(movie);
 
-	initscr();
 	atexit(terminate);
 
 	line = NULL;
