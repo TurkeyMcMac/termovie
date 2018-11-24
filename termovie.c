@@ -44,10 +44,45 @@ bool print_next_frame(char **line, size_t *cap)
 void load_movie(int argc, char *argv[])
 {
 	char *prog_name = argv[0];
-	char *movie_name = argv[1];
+	int opt;
+	movie.speed = 100000;
+	movie.looping = false;
+	while ((opt = getopt(argc, argv, "f:lLvh")) != -1) {
+		switch (opt) {
+		case 'f':
+			if (optarg) {
+				int fps = atoi(optarg);
+				if (fps > 0) {
+					movie.speed = 1000000 / atoi(optarg);
+				} else {
+					fprintf(stderr, "%s: Invalid FPS\n",
+						prog_name);
+					exit(ERROR_ARGUMENT);
+				}
+			} else {
+				fprintf(stderr,
+					"%s: No FPS provided with -f option.\n",
+					prog_name);
+				exit(ERROR_ARGUMENT);
+			}
+			break;
+		case 'l':
+			movie.looping = true;
+			break;
+		case 'L':
+			movie.looping = false;
+			break;
+		case 'h':
+		case 'v':
+			break;
+		default:
+			exit(ERROR_ARGUMENT);
+		}
+	}
+	char *movie_name = argv[optind];
 	if (!movie_name) {
 		movie.frames = stdin;
-	} else if (!(movie.frames = fopen(argv[1], "r"))) {
+	} else if (!(movie.frames = fopen(movie_name, "r"))) {
 		fprintf(stderr, "%s: No movie named '%s' found.\n",
 			prog_name, movie_name);
 		exit(ERROR_ARGUMENT);
@@ -59,8 +94,6 @@ void load_movie(int argc, char *argv[])
 		exit(ERROR_SYSTEM);
 	}
 	movie.frames_begin = ftell(movie.frames);
-	movie.speed = 100000;
-	movie.looping = true;
 }
 
 void play_movie(void)
