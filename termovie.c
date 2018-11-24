@@ -46,11 +46,8 @@ void load_movie(int argc, char *argv[])
 	char *prog_name = argv[0];
 	char *movie_name = argv[1];
 	if (!movie_name) {
-		fprintf(stderr, "%s: No movie name provided.\n", prog_name);
-		exit(ERROR_ARGUMENT);
-	}
-	movie.frames = fopen(argv[1], "r");
-	if (!movie.frames) {
+		movie.frames = stdin;
+	} else if (!(movie.frames = fopen(argv[1], "r"))) {
 		fprintf(stderr, "%s: No movie named '%s' found.\n",
 			prog_name, movie_name);
 		exit(ERROR_ARGUMENT);
