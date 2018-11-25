@@ -1,0 +1,35 @@
+termovie is for terminal movies, simple one-time or repeating animations on the
+command line. The resource is in following format:
+
+<separator line>
+<frame>
+<separator line>
+...
+<frame>
+<separator line>
+
+The frames can vary in contents, width, and height, but the separator must be
+_exactly_ the same each time. It is not specified by the format, and can be
+anything as long as there is consistency.
+
+Example: a loading spinner
+
+termovie -l << MOVIE &
+-
+/
+
+-
+ \
+
+-
+
+ /
+-
+
+\
+-
+MOVIE
+# Do some work
+kill $!
+
+This will display a loading animation until you tell it that you are done.
