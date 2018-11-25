@@ -17,6 +17,31 @@ static struct movie {
 #define ERROR_ARGUMENT 1
 #define ERROR_SYSTEM 2
 
+void print_help(FILE *to)
+{
+	fprintf(to,
+		"Usage: termovie [<options>] [<frames>]\n"
+		"Options:\n"
+		"  -f <fps>  Print <fps> frames per second.\n"
+		"  -l        Loop frames until interrupted.\n"
+		"  -L        Stop after the last frame (the default.)\n"
+		"  -h        Print this help information.\n"
+		"  -v        Print version information.\n"
+		"\n"
+		"If <frames> is not a file, stdin is used.\n"
+	);
+}
+
+void print_version(FILE *to)
+{
+	fprintf(to, "termovie version 0.1.0\n");
+}
+
+void print_advice(FILE *to)
+{
+	fprintf(to, "Use the option -h for help information.\n");
+}
+
 bool print_frame_line(char **line, size_t *cap)
 {
 	if (getline(line, cap, movie.frames) > 0 && strcmp(*line, movie.delim))
@@ -65,12 +90,14 @@ void load_movie(int argc, char *argv[])
 				} else {
 					fprintf(stderr, "%s: Invalid FPS\n",
 						prog_name);
+					print_advice(stderr);
 					exit(ERROR_ARGUMENT);
 				}
 			} else {
 				fprintf(stderr,
 					"%s: No FPS provided with -f option.\n",
 					prog_name);
+				print_advice(stderr);
 				exit(ERROR_ARGUMENT);
 			}
 			break;
@@ -81,8 +108,11 @@ void load_movie(int argc, char *argv[])
 			movie.looping = false;
 			break;
 		case 'h':
+			print_help(stdout);
+			exit(0);
 		case 'v':
-			break;
+			print_version(stdout);
+			exit(0);
 		default:
 			exit(ERROR_ARGUMENT);
 		}
