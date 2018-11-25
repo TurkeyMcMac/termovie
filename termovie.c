@@ -39,6 +39,7 @@ void set_alarm(void) {
 }
 void wait_for_next_alarm(void)
 {
+	// This will be interrupted by SIGALRM, so we won't sleep a second:
 	sleep(1);
 	set_alarm();
 }
@@ -94,8 +95,10 @@ int print_next_frame(char **line, size_t *cap)
 
 void clear_last_frame(int n_lines)
 {
+	// Clear the current line completely:
 	printf("\r\e[K");
 	while (n_lines--) {
+		// Go to the line above and clear it:
 		printf("\e[1A\e[K");
 	}
 }
