@@ -19,14 +19,14 @@ termovie -l << MOVIE &
 /
 
 -
- \
+ \\
 
 -
 
  /
 -
 
-\
+\\
 -
 MOVIE
 # Do some work
