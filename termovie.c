@@ -132,8 +132,9 @@ void load_movie(int argc, char *argv[])
 	while ((opt = getopt(argc, argv, "f:lLvh")) != -1) {
 		switch (opt) {
 		case 'f': {
-				double fps = atof(optarg);
-				if (fps > 0 && fps <= 1e6) {
+				char *end;
+				double fps = strtod(optarg, &end);
+				if (fps > 0 && fps <= 1e6 && *end == '\0') {
 					movie.speed = 1e6 / fps;
 				} else {
 					fprintf(stderr, "%s: Invalid FPS\n",
