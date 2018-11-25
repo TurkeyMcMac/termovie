@@ -42,7 +42,7 @@ int print_next_frame(char **line, size_t *cap)
 
 void clear_last_frame(int n_lines)
 {
-	printf("\e[K");
+	printf("\r\e[K");
 	while (n_lines--) {
 		printf("\e[1A\e[K");
 	}
