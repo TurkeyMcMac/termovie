@@ -9,7 +9,7 @@
 static struct movie {
 	FILE *frames;
 	char *delim;
-	size_t frames_begin;
+	long frames_begin;
 	int speed;
 	bool looping;
 } movie;
