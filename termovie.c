@@ -5,6 +5,7 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 static struct movie {
 	FILE *frames;
@@ -17,6 +18,30 @@ static struct movie {
 
 #define ERROR_ARGUMENT 1
 #define ERROR_SYSTEM 2
+
+void notify_alarm(int _)
+{
+	(void)_;
+	// This just interrupts sleep.
+}
+static struct itimerval frame_alarm_setting;
+void prepare_alarm(void)
+{
+	struct sigaction action;
+	action.sa_handler = notify_alarm;
+	sigaction(SIGALRM, &action, NULL);
+	frame_alarm_setting.it_interval.tv_sec = 0;
+	frame_alarm_setting.it_interval.tv_usec = movie.speed;
+	frame_alarm_setting.it_value = frame_alarm_setting.it_interval;
+}
+void set_alarm(void) {
+	setitimer(ITIMER_REAL, &frame_alarm_setting, NULL);
+}
+void wait_for_next_alarm(void)
+{
+	sleep(1);
+	set_alarm();
+}
 
 void print_help(FILE *to)
 {
@@ -63,7 +88,7 @@ int print_next_frame(char **line, size_t *cap)
 	while (print_frame_line(line, cap)) {
 		++n_lines;
 	}
-	usleep(movie.speed);
+	wait_for_next_alarm();
 	return n_lines;
 }
 
@@ -175,6 +200,8 @@ void play_movie(void)
 	char *line = NULL;
 	size_t cap = 0;
 	prepare_for_termination();
+	prepare_alarm();
+	set_alarm();
 	do {
 		int n_lines;
 		do {
