@@ -35,7 +35,7 @@ void print_help(FILE *to)
 
 void print_version(FILE *to)
 {
-	fprintf(to, "termovie version 0.1.1\n");
+	fprintf(to, "termovie version 0.1.2\n");
 }
 
 void print_advice(FILE *to)
