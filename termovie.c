@@ -152,8 +152,6 @@ void load_movie(int argc, char *argv[])
 	}
 	if ((movie.frames_begin = ftell(movie.frames)) < 0 && movie.looping) {
 		create_seekable_frames();
-	} else {
-		movie.tmp_path = NULL;
 	}
 }
 
