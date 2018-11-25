@@ -28,7 +28,9 @@ static struct itimerval frame_alarm_setting;
 void prepare_alarm(void)
 {
 	struct sigaction action;
+	memset(&action, 0, sizeof(action));
 	action.sa_handler = notify_alarm;
+	action.sa_flags |= SA_RESTART;
 	sigaction(SIGALRM, &action, NULL);
 	div_t time = div(movie.speed, 1e6);
 	frame_alarm_setting.it_interval.tv_sec = time.quot;
@@ -40,8 +42,7 @@ void set_alarm(void) {
 }
 void wait_for_next_alarm(void)
 {
-	// This will be interrupted by SIGALRM, so we won't sleep very long:
-	sleep(-1);
+	pause();
 	set_alarm();
 }
 
