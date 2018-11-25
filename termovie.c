@@ -113,7 +113,7 @@ void notify_terminated(int _)
 void prepare_for_termination(void)
 {
 	struct sigaction action;
-	memset(&action, '0', sizeof(action));
+	memset(&action, 0, sizeof(action));
 	action.sa_handler = notify_terminated;
 	sigaction(SIGTERM, &action, NULL);
 	sigaction(SIGINT, &action, NULL);
