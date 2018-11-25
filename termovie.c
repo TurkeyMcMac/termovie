@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <unistd.h>
 
 static struct movie {
@@ -103,18 +104,33 @@ void load_movie(int argc, char *argv[])
 	movie.frames_begin = ftell(movie.frames);
 }
 
+static sig_atomic_t terminated = false;
+void notify_terminated(int _)
+{
+	(void)_;
+	terminated = true;
+}
+void prepare_for_termination(void)
+{
+	struct sigaction action;
+	memset(&action, '0', sizeof(action));
+	action.sa_handler = notify_terminated;
+	sigaction(SIGINT, &action, NULL);
+}
+
 void play_movie(void)
 {
 	char *line = NULL;
 	size_t cap = 0;
+	prepare_for_termination();
 	do {
 		int n_lines;
 		do {
 			n_lines = print_next_frame(&line, &cap);
 			clear_last_frame(n_lines);
-		} while (n_lines > 0);
+		} while (n_lines > 0 && !terminated);
 		fseek(movie.frames, movie.frames_begin, SEEK_SET);
-	} while (movie.looping);
+	} while (movie.looping && !terminated);
 }
 
 int main(int argc, char *argv[])
