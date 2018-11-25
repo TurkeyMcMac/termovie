@@ -129,23 +129,16 @@ void load_movie(int argc, char *argv[])
 	movie.looping = false;
 	while ((opt = getopt(argc, argv, "f:lLvh")) != -1) {
 		switch (opt) {
-		case 'f':
-			if (optarg) {
+		case 'f': {
 				int fps = atoi(optarg);
-				if (fps > 0) {
-					movie.speed = 1000000 / atoi(optarg);
+				if (fps > 0 && fps <= 1000000) {
+					movie.speed = 1000000 / fps;
 				} else {
 					fprintf(stderr, "%s: Invalid FPS\n",
 						prog_name);
 					print_advice(stderr);
 					exit(ERROR_ARGUMENT);
 				}
-			} else {
-				fprintf(stderr,
-					"%s: No FPS provided with -f option.\n",
-					prog_name);
-				print_advice(stderr);
-				exit(ERROR_ARGUMENT);
 			}
 			break;
 		case 'l':
