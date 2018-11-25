@@ -8,6 +8,7 @@
 
 static struct movie {
 	FILE *frames;
+	char *tmp_path;
 	char *delim;
 	long frames_begin;
 	int speed;
@@ -76,9 +77,11 @@ void clear_last_frame(int n_lines)
 
 void create_seekable_frames(void)
 {
+	static const char tmp_template[] = "/tmp/termovie-frames.XXXXXX";
 	FILE *source = movie.frames;
-	char frames_name[] = "/tmp/termovie-frames.XXXXXX";
-	movie.frames = fdopen(mkstemp(frames_name), "w+");
+	movie.tmp_path = malloc(sizeof(tmp_template));
+	memcpy(movie.tmp_path, tmp_template, sizeof(tmp_template));
+	movie.frames = fdopen(mkstemp(movie.tmp_path), "w+");
 	char buf[BUFSIZ];
 	size_t buflen;
 	do {
@@ -149,6 +152,8 @@ void load_movie(int argc, char *argv[])
 	}
 	if ((movie.frames_begin = ftell(movie.frames)) < 0 && movie.looping) {
 		create_seekable_frames();
+	} else {
+		movie.tmp_path = NULL;
 	}
 }
 
@@ -180,10 +185,22 @@ void play_movie(void)
 		} while (n_lines > 0 && !terminated);
 		fseek(movie.frames, movie.frames_begin, SEEK_SET);
 	} while (movie.looping && !terminated);
+	free(line);
+}
+
+void unload_movie(void)
+{
+	fclose(movie.frames);
+	if (movie.tmp_path) {
+		remove(movie.tmp_path);
+		free(movie.tmp_path);
+	}
+	free(movie.delim);
 }
 
 int main(int argc, char *argv[])
 {
 	load_movie(argc, argv);
 	play_movie();
+	unload_movie();
 }
