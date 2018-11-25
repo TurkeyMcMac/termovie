@@ -30,8 +30,9 @@ void prepare_alarm(void)
 	struct sigaction action;
 	action.sa_handler = notify_alarm;
 	sigaction(SIGALRM, &action, NULL);
-	frame_alarm_setting.it_interval.tv_sec = 0;
-	frame_alarm_setting.it_interval.tv_usec = movie.speed;
+	div_t time = div(movie.speed, 1e6);
+	frame_alarm_setting.it_interval.tv_sec = time.quot;
+	frame_alarm_setting.it_interval.tv_usec = time.rem;
 	frame_alarm_setting.it_value = frame_alarm_setting.it_interval;
 }
 void set_alarm(void) {
@@ -39,8 +40,8 @@ void set_alarm(void) {
 }
 void wait_for_next_alarm(void)
 {
-	// This will be interrupted by SIGALRM, so we won't sleep a second:
-	sleep(1);
+	// This will be interrupted by SIGALRM, so we won't sleep very long:
+	sleep(-1);
 	set_alarm();
 }
 
@@ -130,9 +131,9 @@ void load_movie(int argc, char *argv[])
 	while ((opt = getopt(argc, argv, "f:lLvh")) != -1) {
 		switch (opt) {
 		case 'f': {
-				int fps = atoi(optarg);
-				if (fps > 0 && fps <= 1000000) {
-					movie.speed = 1000000 / fps;
+				double fps = atof(optarg);
+				if (fps > 0 && fps <= 1e6) {
+					movie.speed = 1e6 / fps;
 				} else {
 					fprintf(stderr, "%s: Invalid FPS\n",
 						prog_name);
