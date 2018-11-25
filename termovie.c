@@ -74,6 +74,22 @@ void clear_last_frame(int n_lines)
 	}
 }
 
+void create_seekable_frames(void)
+{
+	FILE *source = movie.frames;
+	char frames_name[] = "/tmp/termovie-frames.XXXXXX";
+	movie.frames = fdopen(mkstemp(frames_name), "w+");
+	char buf[BUFSIZ];
+	size_t buflen;
+	do {
+		buflen = fread(buf, 1, sizeof(buf), source);
+		fwrite(buf, 1, buflen, movie.frames);
+	} while (buflen == sizeof(buf));
+	fclose(source);
+	rewind(movie.frames);
+	movie.frames_begin = 0;
+}
+
 void load_movie(int argc, char *argv[])
 {
 	char *prog_name = argv[0];
@@ -131,7 +147,9 @@ void load_movie(int argc, char *argv[])
 		fprintf(stderr, "%s: %s\n", prog_name, strerror(errno));
 		exit(ERROR_SYSTEM);
 	}
-	movie.frames_begin = ftell(movie.frames);
+	if ((movie.frames_begin = ftell(movie.frames)) < 0 && movie.looping) {
+		create_seekable_frames();
+	}
 }
 
 static sig_atomic_t terminated = false;
