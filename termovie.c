@@ -63,7 +63,7 @@ static void print_help(FILE *to)
 
 static void print_version(FILE *to)
 {
-	fprintf(to, "termovie version 0.3.4\n");
+	fprintf(to, "termovie version 0.3.5\n");
 }
 
 static void print_advice(FILE *to)
@@ -86,7 +86,12 @@ static int print_next_frame(char **line, size_t *cap)
 {
 	int n_lines = 1;
 	if (!print_frame_line(line, cap)) {
-		return 0;
+		if (feof(movie.frames)) {
+			return 0;
+		} else {
+			printf("\n");
+			return 1;
+		}
 	}
 	while (print_frame_line(line, cap)) {
 		++n_lines;
