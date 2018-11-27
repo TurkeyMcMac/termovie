@@ -19,13 +19,13 @@ static struct movie {
 #define ERROR_ARGUMENT 1
 #define ERROR_SYSTEM 2
 
-void notify_alarm(int _)
+static void notify_alarm(int _)
 {
 	(void)_;
 	// This just interrupts sleep.
 }
 static struct itimerval frame_alarm_setting;
-void prepare_alarm(void)
+static void prepare_alarm(void)
 {
 	struct sigaction action;
 	memset(&action, 0, sizeof(action));
@@ -37,16 +37,16 @@ void prepare_alarm(void)
 	frame_alarm_setting.it_interval.tv_usec = time.rem;
 	frame_alarm_setting.it_value = frame_alarm_setting.it_interval;
 }
-void set_alarm(void) {
+static void set_alarm(void) {
 	setitimer(ITIMER_REAL, &frame_alarm_setting, NULL);
 }
-void wait_for_next_alarm(void)
+static void wait_for_next_alarm(void)
 {
 	pause();
 	set_alarm();
 }
 
-void print_help(FILE *to)
+static void print_help(FILE *to)
 {
 	fprintf(to,
 		"Usage: termovie [<options>] [<frames>]\n"
@@ -61,17 +61,17 @@ void print_help(FILE *to)
 	);
 }
 
-void print_version(FILE *to)
+static void print_version(FILE *to)
 {
 	fprintf(to, "termovie version 0.3.4\n");
 }
 
-void print_advice(FILE *to)
+static void print_advice(FILE *to)
 {
 	fprintf(to, "Use the option -h for help information.\n");
 }
 
-bool print_frame_line(char **line, size_t *cap)
+static bool print_frame_line(char **line, size_t *cap)
 {
 	if (getline(line, cap, movie.frames) > 0 && strcmp(*line, movie.delim))
 	{
@@ -82,7 +82,7 @@ bool print_frame_line(char **line, size_t *cap)
 	}
 }
 
-int print_next_frame(char **line, size_t *cap)
+static int print_next_frame(char **line, size_t *cap)
 {
 	int n_lines = 1;
 	if (!print_frame_line(line, cap)) {
@@ -95,7 +95,7 @@ int print_next_frame(char **line, size_t *cap)
 	return n_lines;
 }
 
-void clear_last_frame(int n_lines)
+static void clear_last_frame(int n_lines)
 {
 	// Clear the current line completely:
 	printf("\r\e[K");
@@ -105,7 +105,7 @@ void clear_last_frame(int n_lines)
 	}
 }
 
-void create_seekable_frames(void)
+static void create_seekable_frames(void)
 {
 	static const char tmp_template[] = "/tmp/termovie-frames.XXXXXX";
 	FILE *source = movie.frames;
@@ -123,7 +123,7 @@ void create_seekable_frames(void)
 	movie.frames_begin = 0;
 }
 
-void load_movie(int argc, char *argv[])
+static void load_movie(int argc, char *argv[])
 {
 	char *prog_name = argv[0];
 	int opt;
@@ -180,12 +180,12 @@ void load_movie(int argc, char *argv[])
 }
 
 static sig_atomic_t terminated = false;
-void notify_terminated(int _)
+static void notify_terminated(int _)
 {
 	(void)_;
 	terminated = true;
 }
-void prepare_for_termination(void)
+static void prepare_for_termination(void)
 {
 	struct sigaction action;
 	memset(&action, 0, sizeof(action));
@@ -194,7 +194,7 @@ void prepare_for_termination(void)
 	sigaction(SIGINT, &action, NULL);
 }
 
-void play_movie(void)
+static void play_movie(void)
 {
 	char *line = NULL;
 	size_t cap = 0;
@@ -212,7 +212,7 @@ void play_movie(void)
 	free(line);
 }
 
-void unload_movie(void)
+static void unload_movie(void)
 {
 	fclose(movie.frames);
 	if (movie.tmp_path) {
