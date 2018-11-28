@@ -176,8 +176,12 @@ static void load_movie(int argc, char *argv[])
 	movie.delim = NULL;
 	size_t cap = 0;
 	if (getline(&movie.delim, &cap, movie.frames) < 0) {
-		fprintf(stderr, "%s: %s\n", prog_name, strerror(errno));
-		exit(ERROR_SYSTEM);
+		if (feof(movie.frames)) {
+			exit(0);
+		} else {
+			fprintf(stderr, "%s: %s\n", prog_name, strerror(errno));
+			exit(ERROR_SYSTEM);
+		}
 	}
 	if ((movie.frames_begin = ftell(movie.frames)) < 0 && movie.looping) {
 		create_seekable_frames();
