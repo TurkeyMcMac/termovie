@@ -1,0 +1,53 @@
+.TH termovie 6 "27 November 2018" "version 0.3.5"
+
+.SH NAME
+termovie - Play ASCII-art movies in a terminal window
+
+.SH SYNOPSIS
+\fBtermovie\fR [\fIoptions\fR] [\fIfile\fR]
+
+.SH DESCRIPTION
+\fBtermovie\fR reads frames from the given file or standard input if none is
+specified. It plays the frames in sequence with a delay between each, creating
+an animation.
+.P
+A file begins with a frame separator followed by some number of frames separated
+by frame separators. A frame separator at the end is optional. The syntax for a
+frame separator is arbitrary, but whatever the first line is becomes the frame
+separator for the whole file. Each separator must match exactly; no padding
+whitespace! The frames themselves can contain any text, although take care to
+choose a separator which cannot be present in a frame.
+.P
+Here is a sort of grammar:
+.P
+<movie> ::= (<separator> <cr> <frame>)* <separator>?
+.P
+<separator> ::= <line> ; The same throughout the file
+.P
+<frame> ::= <line>*
+.P
+<line> ::= [^<cr>]* ; You know, a line of text
+
+.SH OPTIONS
+.IP "\fB-f\fR \fIFPS"
+Set the frames displayed ber second to \fIFPS\fR. The default is 10.
+
+.IP \fB-l\fR
+Loop the animation until interrupted.
+
+.IP \fB-L\fR
+Stop animating after the last frame. This is the default.
+
+.IP \fB-h\fR
+Print help information and exit.
+
+.IP \fB-v\fR
+Print version information and exit.
+
+.SH EXIT STATUS
+
+On success, 0 is returned. If an invalid argument is given, 1 is returned. If a
+system error occurs, 2 is returned.
+
+.SH AUTHOR
+Written by Jude Melton-Houghton (jwmhjwmh@gmail.com).

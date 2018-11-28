@@ -33,3 +33,10 @@ MOVIE
 kill $!
 
 This will display a loading animation until you tell it that you are done.
+
+Installing the man page:
+
+This project includes a manual page called termovie.6. To install it, put it
+wherever such man pages go. This might be /usr/share/man/man6, but I don't know
+if that is universal. You might have to look it up. Feel free to gzip the file
+before putting it in place.
