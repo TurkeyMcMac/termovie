@@ -63,7 +63,7 @@ static void print_help(FILE *to)
 
 static void print_version(FILE *to)
 {
-	fprintf(to, "termovie version 0.3.5\n");
+	fprintf(to, "termovie version 0.3.6\n");
 }
 
 static void print_advice(FILE *to)
