@@ -63,7 +63,7 @@ static void print_help(FILE *to)
 
 static void print_version(FILE *to)
 {
-	fprintf(to, "termovie version 0.3.6\n");
+	fprintf(to, "termovie version 0.3.7\n");
 }
 
 static void print_advice(FILE *to)
@@ -203,10 +203,21 @@ static void prepare_for_termination(void)
 	sigaction(SIGINT, &action, NULL);
 }
 
+static void hide_cursor(void)
+{
+	printf("\e[?25l");
+}
+
+static void show_cursor(void)
+{
+	printf("\e[?25h");
+}
+
 static void play_movie(void)
 {
 	char *line = NULL;
 	size_t cap = 0;
+	hide_cursor();
 	prepare_for_termination();
 	prepare_alarm();
 	set_alarm();
@@ -219,6 +230,7 @@ static void play_movie(void)
 		fseek(movie.frames, movie.frames_begin, SEEK_SET);
 	} while (movie.looping && !terminated);
 	free(line);
+	show_cursor();
 }
 
 static void unload_movie(void)
