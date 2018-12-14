@@ -63,7 +63,7 @@ static void print_help(FILE *to)
 
 static void print_version(FILE *to)
 {
-	fprintf(to, "termovie version 0.3.7\n");
+	fprintf(to, "termovie version 0.3.8\n");
 }
 
 static void print_advice(FILE *to)
@@ -171,6 +171,10 @@ static void load_movie(int argc, char *argv[])
 	} else if (!(movie.frames = fopen(movie_name, "r"))) {
 		fprintf(stderr, "%s: No movie named '%s' found.\n",
 			prog_name, movie_name);
+		exit(ERROR_ARGUMENT);
+	}
+	if (!isatty(STDOUT_FILENO)) {
+		fprintf(stderr, "%s: Output destination is not a screen.\n", prog_name);
 		exit(ERROR_ARGUMENT);
 	}
 	movie.delim = NULL;
